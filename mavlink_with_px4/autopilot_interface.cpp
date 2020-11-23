@@ -379,9 +379,9 @@ read_messages()
 
 				case MAVLINK_MSG_ID_GPS_RAW_INT:
 				{
-					mavlink_msg_gps_raw_int(&message, (&current_messages.gps_status));
-					current_messages.time_stamps.gps_raw_int = get_time_usec();
-					this_timestamps.gps_raw_int = current_messages.gps_raw_int;
+					mavlink_msg_gps_raw_int_decode(&message, (&current_messages.gps_raw_int));
+					//current_messages.time_stamps.gps_raw_int = get_time_usec();
+					//this_timestamps.gps_raw_int = current_messages.gps_raw_int;
 				}
 
 
@@ -732,7 +732,7 @@ start()
 	//printf("\n");
 
 	printf("Heading: %i \n ", yaw_uav);
-	printf("Latitude: %d Longtitude \n", latitude, longtitude);
+	printf("Latitude: %d Longtitude %d \n", latitude, longtitude);
 	sleep(0.5);
 
 	}
