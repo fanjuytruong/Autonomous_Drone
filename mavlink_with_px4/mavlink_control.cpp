@@ -69,14 +69,14 @@ top (int argc, char **argv)
 
 	// Default input arguments
 #ifdef __APPLE__
-	char *uart_name = (char*)"/dev/tty.usbmodem1";
+	char *uart_name = (char*)"/dev/tty.usbmodem1";  
 #else
-	char *uart_name = (char*)"/dev/ttyUSB0";
+	char *uart_name = (char*)"/dev/ttyS0"; //dia chi UART Port
 #endif
 	int baudrate = 921600;
 
 	bool use_udp = false;
-	char *udp_ip = (char*)"127.0.0.1";
+	char *udp_ip = (char*)"127.0.0.1";  
 	int udp_port = 14540;
 	bool autotakeoff = false;
 
@@ -99,13 +99,13 @@ top (int argc, char **argv)
 	 *
 	 */
 	Generic_Port *port;
-	if(use_udp)
+	if(use_udp)		//use_udp = false
 	{
 		port = new UDP_Port(udp_ip, udp_port);
 	}
 	else
 	{
-		port = new Serial_Port(uart_name, baudrate);
+		port = new Serial_Port(uart_name, baudrate);		//cap phat bo nho dong cho con tro "port"
 	}
 
 
@@ -153,7 +153,7 @@ top (int argc, char **argv)
 	/*
 	 * Now we can implement the algorithm we want on top of the autopilot interface
 	 */
-	commands(autopilot_interface, autotakeoff);
+	//commands(autopilot_interface, autotakeoff);
 
 
 	// --------------------------------------------------------------------------
@@ -189,7 +189,7 @@ commands(Autopilot_Interface &api, bool autotakeoff)
 	// --------------------------------------------------------------------------
 	//   START OFFBOARD MODE
 	// --------------------------------------------------------------------------
-
+	/*
 	api.enable_offboard_control();
 	usleep(100); // give some time to let it sink in
 
@@ -299,34 +299,61 @@ commands(Autopilot_Interface &api, bool autotakeoff)
 
 	// now pixhawk isn't listening to setpoint commands
 
-
+ 	*/
 	// --------------------------------------------------------------------------
 	//   GET A MESSAGE
 	// --------------------------------------------------------------------------
 	printf("READ SOME MESSAGES \n");
 
+	while(1)
+	{
 	// copy current messages
 	Mavlink_Messages messages = api.current_messages;
+	//Tu struct "MAVLINK_Messages", tao tin nhan "messages", truyen thong tin current_messages vao bien nay
+	//current_messages bao gom cac truong(fields):
+	//heartbeat, sys_status, battery, radio, highres_imu, attitude, local_pos_ned, pos_target_local...
 
 	// local position in ned frame
-	mavlink_local_position_ned_t pos = messages.local_position_ned;
-	printf("Got message LOCAL_POSITION_NED (spec: https://mavlink.io/en/messages/common.html#LOCAL_POSITION_NED)\n");
-	printf("    pos  (NED):  %f %f %f (m)\n", pos.x, pos.y, pos.z );
+	//Struct "mavlink_local_pos_ned_t" bao gom: Position (X,Y,Z) va Speed Position (VX, VY, VZ)
+	// mavlink_local_position_ned_t pos = messages.local_position_ned;
 
+	//struct "mavlink_local_position_ned_t" tao bien co ten "pos"
+	//du lieu tu "messages", truyen vao trong struct "mavlin_local_pos_ned" thong qua field "local_postion_ned"
+	// printf("Got message LOCAL_POSITION_NED (spec: https://mavlink.io/en/messages/common.html#LOCAL_POSITION_NED)\n");
+	// printf("    pos  (NED):  %f %f %f (m)\n", pos.x, pos.y, pos.z );
+	//xuat ra 3 toa do trong truong (x,y,z)
+	//mavlink_global_vision_position_estimate_t pos_estimate = messages.global_vision_position_estimate;
+	//mavlink_global_position_int_t location = messages.global_position_int;
 	// hires imu
-	mavlink_highres_imu_t imu = messages.highres_imu;
-	printf("Got message HIGHRES_IMU (spec: https://mavlink.io/en/messages/common.html#HIGHRES_IMU)\n");
-	printf("    ap time:     %lu \n", imu.time_usec);
-	printf("    acc  (NED):  % f % f % f (m/s^2)\n", imu.xacc , imu.yacc , imu.zacc );
-	printf("    gyro (NED):  % f % f % f (rad/s)\n", imu.xgyro, imu.ygyro, imu.zgyro);
-	printf("    mag  (NED):  % f % f % f (Ga)\n"   , imu.xmag , imu.ymag , imu.zmag );
-	printf("    baro:        %f (mBar) \n"  , imu.abs_pressure);
-	printf("    altitude:    %f (m) \n"     , imu.pressure_alt);
-	printf("    temperature: %f C \n"       , imu.temperature );
+	//mavlink_highres_imu_t imu = messages.highres_imu;
+
+	//mavlink_attitude_t attitude = messages.attitude;
+
+	mavlink_vfr_hud_t vfr_hud = messages.vfr_hud;
+	// printf("Got message HIGHRES_IMU (spec: https://mavlink.io/en/messages/common.html#HIGHRES_IMU)\n");
+	// printf("    ap time:     %lu \n", imu.time_usec);
+	//printf("    acc  (NED):  % f % f % f (m/s^2)\n", imu.xacc , imu.yacc , imu.zacc );
+	//printf("    gyro (NED):  % f % f % f (rad/s)\n", imu.xgyro, imu.ygyro, imu.zgyro);
+	//printf("    mag  (NED):  % f % f % f (Ga)\n"   , imu.xmag , imu.ymag , imu.zmag );
+
+
+	//printf("	Position: % f % f % f  \n", pos_estimate.x, pos_estimate.y, pos_estimate.z);		//Xuat vi tri kinh do - vi do
+	//printf("	Angle: % f %f %f \n", pos_estimate.roll, pos_estimate.pitch, pos_estimate.yaw);		// Xuat cac goc ngang cua UAV
+	//degree = imu.zgyro *  57.295779513;  		//Chuyen radian sang Goc
+	//angle_yaw += degree;
+	//printf("Angle Yaw:  %f \n", angle_yaw);
+	//printf("GPS -  Latitude:  % f  Longtitude: % f \n", GPS.lat. GPS.lon);
+	//printf("Attitude: %f %f  %f \n", 	attitude.roll, attitude.pitch, attitude.yaw);
+	// printf("    baro:        %f (mBar) \n"  , imu.abs_pressure);
+	// printf("    altitude:    %f (m) \n"     , imu.pressure_alt);
+	// printf("    temperature: %f C \n"       , imu.temperature );
+	printf("Heading: %i \n", vfr_hud.heading );
+	//printf("Altitude: %f \n", vfr_hud.alt);
+
 
 	printf("\n");
-
-
+	//sleep(0.5);
+}
 	// --------------------------------------------------------------------------
 	//   END OF COMMANDS
 	// --------------------------------------------------------------------------
