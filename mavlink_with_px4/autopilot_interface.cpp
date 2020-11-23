@@ -377,6 +377,12 @@ read_messages()
 					break;
 				}
 
+				case MAVLINK_MSG_ID_GPS_RAW_INT:
+				{
+					mavlink_msg_gps_raw_int(&message, (&current_messages.gps_status));
+					current_messages.time_stamps.gps_raw_int = get_time_usec();
+					this_timestamps.gps_raw_int = current_messages.gps_raw_int;
+				}
 
 
 				default:
@@ -718,13 +724,16 @@ start()
 
 
 	int16_t	yaw_uav = local_data.vfr_hud.heading;
+	int32_t latitude = local_data.gps_raw_int.lat;
+	int32_t longtitude = local_data.gps_raw_int.lon;
 
-	printf("INITIAL POSITION XYZ = [ %.4f , %.4f , %.4f ] \n", initial_position.x, initial_position.y, initial_position.z);
-	printf("INITIAL POSITION YAW = %.4f \n", initial_position.yaw);
-	printf("\n");
+	//printf("INITIAL POSITION XYZ = [ %.4f , %.4f , %.4f ] \n", initial_position.x, initial_position.y, initial_position.z);
+	//printf("INITIAL POSITION YAW = %.4f \n", initial_position.yaw);
+	//printf("\n");
 
 	printf("Heading: %i \n ", yaw_uav);
-	usleep(1000000);
+	printf("Latitude: %d Longtitude \n", latitude, longtitude);
+	sleep(0.5);
 
 	}
 	// we need this before starting the write thread
